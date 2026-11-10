@@ -1,0 +1,5 @@
+realiza{1suma1};
+realiza{1suma1multi2};
+realiza{resta(1suma1multi6divi3resta5suma7)};
+realiza{resta(1suma1multi6divi3resta5suma1multiresta2)};
+realiza{resta(1.6suma1.45)};

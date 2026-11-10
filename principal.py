@@ -129,7 +129,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label.setText(_translate("MainWindow", "TextLabel"))
         self.botonAbrir.setText(_translate("MainWindow", "Abrir Archivo"))
-        self.botonComando.setText(_translate("MainWindow", "Ejecutar Comando Sys"))
+        self.botonComando.setText(_translate("MainWindow", "Analizar código"))
         self.menu_File.setTitle(_translate("MainWindow", "&Archivo"))
         self.menu_Edit.setTitle(_translate("MainWindow", "&Editar"))
         self.menu_Ayuda.setTitle(_translate("MainWindow", "A&yuda"))

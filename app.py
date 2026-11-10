@@ -1,5 +1,3 @@
-import os
-import subprocess
 import sys
 from pathlib import Path
 
@@ -13,6 +11,7 @@ from PyQt6.QtWidgets import (
 )
 
 from principal import Ui_MainWindow
+from gramatica import lexer, parser
 
 
 class Window(QMainWindow, Ui_MainWindow):
@@ -57,7 +56,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.action_Acerca_de.triggered.connect(self.mostrar_acerca_de)
 
         self.botonAbrir.clicked.connect(self.abrir_archivo)
-        self.botonComando.clicked.connect(self.ejecutar_comando)
+        self.botonComando.clicked.connect(self.analizar_codigo)
         self.cajaTexto.document().modificationChanged.connect(self.actualizar_titulo)
         self.actualizar_titulo()
 
@@ -188,19 +187,31 @@ class Window(QMainWindow, Ui_MainWindow):
     def mostrar_acerca_de(self) -> None:
         QMessageBox.about(self, "Acerca de", "Editor de archivos de texto creado con PyQt6.")
 
-    def ejecutar_comando(self) -> None:
-        comando = ["cmd", "/c", "dir"] if os.name == "nt" else ["ls"]
-        try:
-            resultado = subprocess.run(
-                comando, capture_output=True, text=True, check=True
-            )
-        except (OSError, subprocess.CalledProcessError) as error:
-            detalle = getattr(error, "stderr", None) or str(error)
-            self.salidaConsola.setPlainText(detalle)
-            QMessageBox.critical(self, "Error al ejecutar comando", detalle)
+    def analizar_codigo(self) -> None:
+        codigo = self.cajaTexto.toPlainText()
+        if not codigo.strip():
+            self.salidaConsola.setPlainText("No hay código para analizar.")
             return
 
-        self.salidaConsola.setPlainText(resultado.stdout)
+        lexer.lineno = 1
+        try:
+            resultados = parser.parse(codigo, lexer=lexer)
+        except (SyntaxError, ValueError, ZeroDivisionError) as error:
+            detalle = str(error)
+            self.salidaConsola.setPlainText(detalle)
+            self.statusbar.showMessage("El análisis terminó con errores.", 5000)
+            return
+
+        if not resultados:
+            self.salidaConsola.setPlainText("No se encontraron instrucciones.")
+            return
+
+        salida = "\n".join(
+            f"Resultado {indice}: {resultado}"
+            for indice, resultado in enumerate(resultados, start=1)
+        )
+        self.salidaConsola.setPlainText(salida)
+        self.statusbar.showMessage("Análisis completado.", 5000)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if self.confirmar_cambios():

@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
 )
 
 from principal import Ui_MainWindow
-from gramatica import lexer, parser
+from gramatica import ejecutar, lexer, parser
 
 
 class Window(QMainWindow, Ui_MainWindow):
@@ -195,22 +195,19 @@ class Window(QMainWindow, Ui_MainWindow):
 
         lexer.lineno = 1
         try:
-            resultados = parser.parse(codigo, lexer=lexer)
-        except (SyntaxError, ValueError, ZeroDivisionError) as error:
+            instrucciones = parser.parse(codigo, lexer=lexer)
+            resultados = ejecutar(instrucciones)
+        except (SyntaxError, ValueError, ZeroDivisionError, TypeError) as error:
             detalle = str(error)
             self.salidaConsola.setPlainText(detalle)
             self.statusbar.showMessage("El análisis terminó con errores.", 5000)
             return
 
-        if not resultados:
+        if not instrucciones:
             self.salidaConsola.setPlainText("No se encontraron instrucciones.")
             return
 
-        salida = "\n".join(
-            f"Resultado {indice}: {resultado}"
-            for indice, resultado in enumerate(resultados, start=1)
-        )
-        self.salidaConsola.setPlainText(salida)
+        self.salidaConsola.setPlainText("\n".join(resultados) or "Programa ejecutado sin salida.")
         self.statusbar.showMessage("Análisis completado.", 5000)
 
     def closeEvent(self, event: QCloseEvent) -> None:

@@ -11,7 +11,11 @@ from PyQt6.QtWidgets import (
 )
 
 from principal import Ui_MainWindow
-from gramatica import ejecutar, lexer, parser
+from gramatica import ErrorEjecucion, ejecutar, lexer, parser
+
+
+EXTENSION_POR_DEFECTO = ".ism"
+FILTRO_ARCHIVOS = "Archivos ISM (*.ism);;Archivos de texto (*.txt);;Todos los archivos (*)"
 
 
 class Window(QMainWindow, Ui_MainWindow):
@@ -86,6 +90,7 @@ class Window(QMainWindow, Ui_MainWindow):
         if not self.confirmar_cambios():
             return
         self.cajaTexto.clear()
+        self.salidaConsola.clear()
         self.current_file = None
         self.cajaTexto.document().setModified(False)
         self.actualizar_titulo()
@@ -96,7 +101,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self,
             "Abrir archivo",
             str(self.current_file.parent if self.current_file else Path.home()),
-            "Archivos de texto (*.ism *.txt);;Todos los archivos (*)",
+            FILTRO_ARCHIVOS,
         )
         if archivo:
             self.cargar_archivo(Path(archivo))
@@ -111,6 +116,7 @@ class Window(QMainWindow, Ui_MainWindow):
             return False
 
         self.cajaTexto.setPlainText(contenido)
+        self.salidaConsola.clear()
         self.cajaTexto.document().setModified(False)
         self.current_file = archivo
         self.agregar_reciente(archivo)
@@ -125,11 +131,13 @@ class Window(QMainWindow, Ui_MainWindow):
                 self,
                 "Guardar archivo",
                 str(Path.home() / "sin-titulo.ism"),
-                "Archivos de texto (*.ism *.txt);;Todos los archivos (*)",
+                FILTRO_ARCHIVOS,
             )
             if not nombre:
                 return False
             archivo = Path(nombre)
+            if not archivo.suffix:
+                archivo = archivo.with_suffix(EXTENSION_POR_DEFECTO)
 
         try:
             archivo.write_text(self.cajaTexto.toPlainText(), encoding="utf-8")
@@ -182,33 +190,58 @@ class Window(QMainWindow, Ui_MainWindow):
             return
 
         self.cajaTexto.setPlainText(contenido.replace(buscar, reemplazo))
-        self.statusbar.showMessage(f"Se reemplazaron {cantidad} coincidencias.", 5000)
+        self.statusbar.showMessage(
+            f"Se reemplazó «{buscar}» por «{reemplazo}» ({cantidad} coincidencia(s)).", 5000
+        )
 
     def mostrar_acerca_de(self) -> None:
         QMessageBox.about(self, "Acerca de", "Editor de archivos de texto creado con PyQt6.")
 
+    def mostrar_resultado(self, texto: str, estado: str) -> None:
+        self.salidaConsola.setPlainText(texto)
+        self.statusbar.showMessage(estado, 5000)
+
     def analizar_codigo(self) -> None:
         codigo = self.cajaTexto.toPlainText()
         if not codigo.strip():
-            self.salidaConsola.setPlainText("No hay código para analizar.")
+            self.mostrar_resultado("No hay código para analizar.", "Editor vacío.")
             return
 
+        # Fase 1: análisis léxico y sintáctico (PLY)
         lexer.lineno = 1
         try:
             instrucciones = parser.parse(codigo, lexer=lexer)
-            resultados = ejecutar(instrucciones)
-        except (SyntaxError, ValueError, ZeroDivisionError, TypeError) as error:
-            detalle = str(error)
-            self.salidaConsola.setPlainText(detalle)
-            self.statusbar.showMessage("El análisis terminó con errores.", 5000)
+        except SyntaxError as error:
+            self.mostrar_resultado(f"✖ Error sintáctico: {error}", "Error sintáctico.")
+            return
+        except ValueError as error:
+            self.mostrar_resultado(f"✖ Error léxico: {error}", "Error léxico.")
+            return
+        except Exception as error:  # evita que un fallo inesperado cierre la interfaz
+            self.mostrar_resultado(f"✖ Error inesperado al analizar: {error}", "Error inesperado.")
             return
 
         if not instrucciones:
-            self.salidaConsola.setPlainText("No se encontraron instrucciones.")
+            self.mostrar_resultado("No se encontraron instrucciones.", "Sin instrucciones.")
             return
 
-        self.salidaConsola.setPlainText("\n".join(resultados) or "Programa ejecutado sin salida.")
-        self.statusbar.showMessage("Análisis completado.", 5000)
+        # Fase 2: ejecución del programa ya validado
+        try:
+            resultados = ejecutar(instrucciones)
+        except (ErrorEjecucion, ZeroDivisionError, TypeError, ValueError) as error:
+            self.mostrar_resultado(
+                f"✔ Sintaxis válida.\n✖ Error de ejecución: {error}", "Error de ejecución."
+            )
+            return
+        except Exception as error:
+            self.mostrar_resultado(f"✖ Error inesperado al ejecutar: {error}", "Error inesperado.")
+            return
+
+        salida = "\n".join(resultados) if resultados else "(el programa no produjo salida)"
+        self.mostrar_resultado(
+            f"✔ Código válido (sin errores léxicos ni sintácticos).\n\n--- Salida ---\n{salida}",
+            "Análisis completado sin errores.",
+        )
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if self.confirmar_cambios():
@@ -217,7 +250,12 @@ class Window(QMainWindow, Ui_MainWindow):
             event.ignore()
 
 
-app = QApplication(sys.argv)
-window = Window()
-window.show()
-sys.exit(app.exec())
+def main() -> int:
+    app = QApplication(sys.argv)
+    window = Window()
+    window.show()
+    return app.exec()
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -217,7 +217,12 @@ class Window(QMainWindow, Ui_MainWindow):
             event.ignore()
 
 
-app = QApplication(sys.argv)
-window = Window()
-window.show()
-sys.exit(app.exec())
+def main() -> int:
+    app = QApplication(sys.argv)
+    window = Window()
+    window.show()
+    return app.exec()
+
+
+if __name__ == "__main__":
+    sys.exit(main())

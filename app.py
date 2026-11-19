@@ -202,6 +202,10 @@ class Window(QMainWindow, Ui_MainWindow):
             self.salidaConsola.setPlainText(detalle)
             self.statusbar.showMessage("El análisis terminó con errores.", 5000)
             return
+        except Exception as error:  # evita que un fallo inesperado cierre la interfaz
+            self.salidaConsola.setPlainText(f"Error inesperado: {error}")
+            self.statusbar.showMessage("Error inesperado durante el análisis.", 5000)
+            return
 
         if not instrucciones:
             self.salidaConsola.setPlainText("No se encontraron instrucciones.")

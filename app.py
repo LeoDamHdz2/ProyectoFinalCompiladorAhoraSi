@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
 )
 
 from principal import Ui_MainWindow
-from gramatica import ejecutar, lexer, parser
+from gramatica import ErrorEjecucion, ejecutar, lexer, parser
 
 
 class Window(QMainWindow, Ui_MainWindow):
@@ -187,32 +187,51 @@ class Window(QMainWindow, Ui_MainWindow):
     def mostrar_acerca_de(self) -> None:
         QMessageBox.about(self, "Acerca de", "Editor de archivos de texto creado con PyQt6.")
 
+    def mostrar_resultado(self, texto: str, estado: str) -> None:
+        self.salidaConsola.setPlainText(texto)
+        self.statusbar.showMessage(estado, 5000)
+
     def analizar_codigo(self) -> None:
         codigo = self.cajaTexto.toPlainText()
         if not codigo.strip():
-            self.salidaConsola.setPlainText("No hay código para analizar.")
+            self.mostrar_resultado("No hay código para analizar.", "Editor vacío.")
             return
 
+        # Fase 1: análisis léxico y sintáctico (PLY)
         lexer.lineno = 1
         try:
             instrucciones = parser.parse(codigo, lexer=lexer)
-            resultados = ejecutar(instrucciones)
-        except (SyntaxError, ValueError, ZeroDivisionError, TypeError) as error:
-            detalle = str(error)
-            self.salidaConsola.setPlainText(detalle)
-            self.statusbar.showMessage("El análisis terminó con errores.", 5000)
+        except SyntaxError as error:
+            self.mostrar_resultado(f"✖ Error sintáctico: {error}", "Error sintáctico.")
+            return
+        except ValueError as error:
+            self.mostrar_resultado(f"✖ Error léxico: {error}", "Error léxico.")
             return
         except Exception as error:  # evita que un fallo inesperado cierre la interfaz
-            self.salidaConsola.setPlainText(f"Error inesperado: {error}")
-            self.statusbar.showMessage("Error inesperado durante el análisis.", 5000)
+            self.mostrar_resultado(f"✖ Error inesperado al analizar: {error}", "Error inesperado.")
             return
 
         if not instrucciones:
-            self.salidaConsola.setPlainText("No se encontraron instrucciones.")
+            self.mostrar_resultado("No se encontraron instrucciones.", "Sin instrucciones.")
             return
 
-        self.salidaConsola.setPlainText("\n".join(resultados) or "Programa ejecutado sin salida.")
-        self.statusbar.showMessage("Análisis completado.", 5000)
+        # Fase 2: ejecución del programa ya validado
+        try:
+            resultados = ejecutar(instrucciones)
+        except (ErrorEjecucion, ZeroDivisionError, TypeError, ValueError) as error:
+            self.mostrar_resultado(
+                f"✔ Sintaxis válida.\n✖ Error de ejecución: {error}", "Error de ejecución."
+            )
+            return
+        except Exception as error:
+            self.mostrar_resultado(f"✖ Error inesperado al ejecutar: {error}", "Error inesperado.")
+            return
+
+        salida = "\n".join(resultados) if resultados else "(el programa no produjo salida)"
+        self.mostrar_resultado(
+            f"✔ Código válido (sin errores léxicos ni sintácticos).\n\n--- Salida ---\n{salida}",
+            "Análisis completado sin errores.",
+        )
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if self.confirmar_cambios():

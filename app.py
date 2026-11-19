@@ -22,8 +22,9 @@ class Window(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        # Colores en las letras
+        # Activar el resaltado de sintaxis
         self.resaltador = Resaltador(self.cajaTexto.document())
+        self.resaltador.rehighlight()
         
         # Tema oscuro de la aplicación
         self.setStyleSheet("""

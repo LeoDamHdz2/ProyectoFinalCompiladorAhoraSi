@@ -593,5 +593,4 @@ def ejecutar(programa: list[Statement]) -> list[str]:
 
 
 import ply.yacc as yacc
-
 parser = yacc.yacc(write_tables=False, debug=False)

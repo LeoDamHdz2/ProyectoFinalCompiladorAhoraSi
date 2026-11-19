@@ -12,16 +12,74 @@ from PyQt6.QtWidgets import (
 
 from principal import Ui_MainWindow
 from gramatica import ErrorEjecucion, ejecutar, lexer, parser
-
+from colores import Resaltador
 
 EXTENSION_POR_DEFECTO = ".ism"
 FILTRO_ARCHIVOS = "Archivos ISM (*.ism);;Archivos de texto (*.txt);;Todos los archivos (*)"
-
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+
+        # Colores en las letras
+        self.resaltador = Resaltador(self.cajaTexto.document())
+        
+        # Tema oscuro de la aplicación
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #181818;
+            }
+
+            QPlainTextEdit, QTextEdit {
+                background-color: #1E1E1E;
+                color: #D4D4D4;
+                border: 1px solid #333333;
+                border-radius: 6px;
+                font-family: Consolas;
+                font-size: 14px;
+                padding: 10px;
+                selection-background-color: #264F78;
+            }
+
+            QMenuBar {
+                background-color: #252526;
+                color: #FFFFFF;
+            }
+
+            QMenuBar::item:selected, QMenu::item:selected {
+                background-color: #094771;
+            }
+
+            QMenu {
+                background-color: #252526;
+                color: #FFFFFF;
+                border: 1px solid #444444;
+            }
+
+            QPushButton {
+                background-color: #303030;
+                color: #FFFFFF;
+                border: 1px solid #505050;
+                padding: 8px;
+                border-radius: 5px;
+            }
+
+            QPushButton:hover {
+                background-color: #404040;
+            }
+
+            QStatusBar {
+                background-color: #007ACC;
+                color: white;
+            }
+
+            QToolBar {
+                background-color: #252526;
+                border: none;
+            }
+        """)
+
 
         self.current_file: Path | None = None
         self.recent_files: list[Path] = []
@@ -211,18 +269,25 @@ class Window(QMainWindow, Ui_MainWindow):
         lexer.lineno = 1
         try:
             instrucciones = parser.parse(codigo, lexer=lexer)
+
         except SyntaxError as error:
             self.mostrar_resultado(f"✖ Error sintáctico: {error}", "Error sintáctico.")
             return
         except ValueError as error:
             self.mostrar_resultado(f"✖ Error léxico: {error}", "Error léxico.")
             return
-        except Exception as error:  # evita que un fallo inesperado cierre la interfaz
-            self.mostrar_resultado(f"✖ Error inesperado al analizar: {error}", "Error inesperado.")
+        except Exception as error:
+            self.mostrar_resultado(
+                f"✖ Error inesperado al analizar: {error}",
+                "Error inesperado."
+            )
             return
 
         if not instrucciones:
-            self.mostrar_resultado("No se encontraron instrucciones.", "Sin instrucciones.")
+            self.mostrar_resultado(
+                "No se encontraron instrucciones.",
+                "Sin instrucciones."
+            )
             return
 
         # Fase 2: ejecución del programa ya validado
@@ -230,24 +295,30 @@ class Window(QMainWindow, Ui_MainWindow):
             resultados = ejecutar(instrucciones)
         except (ErrorEjecucion, ZeroDivisionError, TypeError, ValueError) as error:
             self.mostrar_resultado(
-                f"✔ Sintaxis válida.\n✖ Error de ejecución: {error}", "Error de ejecución."
+                f"✔ Sintaxis válida.\n✖ Error de ejecución: {error}",
+                "Error de ejecución."
             )
             return
         except Exception as error:
-            self.mostrar_resultado(f"✖ Error inesperado al ejecutar: {error}", "Error inesperado.")
+            self.mostrar_resultado(
+                f"✖ Error inesperado al ejecutar: {error}",
+                "Error inesperado."
+            )
             return
 
         salida = "\n".join(resultados) if resultados else "(el programa no produjo salida)"
         self.mostrar_resultado(
             f"✔ Código válido (sin errores léxicos ni sintácticos).\n\n--- Salida ---\n{salida}",
-            "Análisis completado sin errores.",
+            "Análisis completado sin errores."
         )
+
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if self.confirmar_cambios():
             event.accept()
         else:
             event.ignore()
+
 
 
 def main() -> int:
@@ -259,3 +330,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+ 

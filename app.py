@@ -90,6 +90,7 @@ class Window(QMainWindow, Ui_MainWindow):
         if not self.confirmar_cambios():
             return
         self.cajaTexto.clear()
+        self.salidaConsola.clear()
         self.current_file = None
         self.cajaTexto.document().setModified(False)
         self.actualizar_titulo()
@@ -115,6 +116,7 @@ class Window(QMainWindow, Ui_MainWindow):
             return False
 
         self.cajaTexto.setPlainText(contenido)
+        self.salidaConsola.clear()
         self.cajaTexto.document().setModified(False)
         self.current_file = archivo
         self.agregar_reciente(archivo)
@@ -188,7 +190,9 @@ class Window(QMainWindow, Ui_MainWindow):
             return
 
         self.cajaTexto.setPlainText(contenido.replace(buscar, reemplazo))
-        self.statusbar.showMessage(f"Se reemplazaron {cantidad} coincidencias.", 5000)
+        self.statusbar.showMessage(
+            f"Se reemplazó «{buscar}» por «{reemplazo}» ({cantidad} coincidencia(s)).", 5000
+        )
 
     def mostrar_acerca_de(self) -> None:
         QMessageBox.about(self, "Acerca de", "Editor de archivos de texto creado con PyQt6.")

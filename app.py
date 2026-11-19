@@ -14,6 +14,10 @@ from principal import Ui_MainWindow
 from gramatica import ErrorEjecucion, ejecutar, lexer, parser
 
 
+EXTENSION_POR_DEFECTO = ".ism"
+FILTRO_ARCHIVOS = "Archivos ISM (*.ism);;Archivos de texto (*.txt);;Todos los archivos (*)"
+
+
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -96,7 +100,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self,
             "Abrir archivo",
             str(self.current_file.parent if self.current_file else Path.home()),
-            "Archivos de texto (*.ism *.txt);;Todos los archivos (*)",
+            FILTRO_ARCHIVOS,
         )
         if archivo:
             self.cargar_archivo(Path(archivo))
@@ -125,11 +129,13 @@ class Window(QMainWindow, Ui_MainWindow):
                 self,
                 "Guardar archivo",
                 str(Path.home() / "sin-titulo.ism"),
-                "Archivos de texto (*.ism *.txt);;Todos los archivos (*)",
+                FILTRO_ARCHIVOS,
             )
             if not nombre:
                 return False
             archivo = Path(nombre)
+            if not archivo.suffix:
+                archivo = archivo.with_suffix(EXTENSION_POR_DEFECTO)
 
         try:
             archivo.write_text(self.cajaTexto.toPlainText(), encoding="utf-8")

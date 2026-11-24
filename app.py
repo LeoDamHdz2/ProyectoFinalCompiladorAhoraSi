@@ -1,13 +1,16 @@
 import sys
 from pathlib import Path
 
-from PyQt6.QtGui import QCloseEvent, QIcon, QKeySequence
+import re
+
+from PyQt6.QtGui import QCloseEvent, QIcon, QKeySequence, QColor, QTextCursor, QTextFormat 
 from PyQt6.QtWidgets import (
     QApplication,
     QFileDialog,
     QInputDialog,
     QMainWindow,
     QMessageBox,
+    QTextEdit,
 )
 
 from principal import Ui_MainWindow
@@ -59,15 +62,20 @@ class Window(QMainWindow, Ui_MainWindow):
             }
 
             QPushButton {
-                background-color: #303030;
+                background-color: #2563EB;
                 color: #FFFFFF;
-                border: 1px solid #505050;
-                padding: 8px;
+                font-size: 14px;
+                font-weight: bold;
+                border: none;
                 border-radius: 5px;
             }
 
             QPushButton:hover {
-                background-color: #404040;
+                background-color: #3B82F6;
+            }
+
+            QPushButton:pressed {
+                background-color: #047857;
             }
 
             QStatusBar {
@@ -128,22 +136,138 @@ class Window(QMainWindow, Ui_MainWindow):
         marca = " *" if self.cajaTexto.document().isModified() else ""
         self.setWindowTitle(f"{nombre}{marca} - Editor")
 
+
     def confirmar_cambios(self) -> bool:
         if not self.cajaTexto.document().isModified():
             return True
 
-        respuesta = QMessageBox.question(
-            self,
-            "Cambios sin guardar",
-            "Hay cambios sin guardar. ¿Quieres guardarlos?",
+        mensaje = QMessageBox(self)
+        mensaje.setWindowTitle("Cambios sin guardar")
+        mensaje.setText("Hay cambios sin guardar. ¿Quieres guardarlos?")
+        mensaje.setIcon(QMessageBox.Icon.Question)
+
+        mensaje.setStandardButtons(
             QMessageBox.StandardButton.Save
             | QMessageBox.StandardButton.Discard
-            | QMessageBox.StandardButton.Cancel,
-            QMessageBox.StandardButton.Save,
+            | QMessageBox.StandardButton.Cancel
         )
+
+        mensaje.setDefaultButton(QMessageBox.StandardButton.Save)
+
+        # Botón Guardar
+        guardar = mensaje.button(QMessageBox.StandardButton.Save)
+        guardar.setText("Guardar")
+        guardar.setStyleSheet("""
+            QPushButton {
+                background-color: #15803D;
+                color: white;
+                font-size: 13px;
+                font-weight: bold;
+                border: none;
+                border-radius: 5px;
+                min-width: 85px;
+                min-height: 30px;
+                padding: 4px 10px;
+            }
+            QPushButton:hover {
+                background-color: #16A34A;
+            }
+            QPushButton:pressed {
+                background-color: #166534;
+            }
+        """)
+
+        # Botón Descartar
+        descartar = mensaje.button(QMessageBox.StandardButton.Discard)
+        descartar.setText("Descartar")
+        descartar.setStyleSheet("""
+            QPushButton {
+                background-color: #DC2626;
+                color: white;
+                font-size: 13px;
+                font-weight: bold;
+                border: none;
+                border-radius: 5px;
+                min-width: 85px;
+                min-height: 30px;
+                padding: 4px 10px;
+            }
+            QPushButton:hover {
+                background-color: #EF4444;
+            }
+            QPushButton:pressed {
+                background-color: #B91C1C;
+            }
+        """)
+
+        # Botón Cancelar
+        cancelar = mensaje.button(QMessageBox.StandardButton.Cancel)
+        cancelar.setText("Cancelar")
+        cancelar.setStyleSheet("""
+            QPushButton {
+                background-color: #64748B;
+                color: white;
+                font-size: 13px;
+                font-weight: bold;
+                border: none;
+                border-radius: 5px;
+                min-width: 85px;
+                min-height: 30px;
+                padding: 4px 10px;
+            }
+            QPushButton:hover {
+                background-color: #475569;
+            }
+            QPushButton:pressed {
+                background-color: #334155;
+            }
+        """)
+
+        mensaje.setEscapeButton(QMessageBox.StandardButton.Cancel)
+
+        respuesta = mensaje.exec()
+
         if respuesta == QMessageBox.StandardButton.Save:
             return self.guardar_archivo()
+
         return respuesta == QMessageBox.StandardButton.Discard
+
+    # Marcar la línea donde existe un error
+    def marcar_error(self, linea, columna=1):
+        bloque = self.cajaTexto.document().findBlockByNumber(
+            linea - 1
+        )
+
+        if not bloque.isValid():
+            return
+
+        cursor = QTextCursor(bloque)
+
+        seleccion = QTextEdit.ExtraSelection()
+        seleccion.format.setBackground(QColor("#522525"))
+
+        seleccion.format.setProperty(
+            QTextFormat.Property.FullWidthSelection,
+            True
+        )
+
+        seleccion.cursor = cursor
+
+        self.cajaTexto.setExtraSelections([seleccion])
+
+        cursor.movePosition(
+            QTextCursor.MoveOperation.Right,
+            QTextCursor.MoveMode.MoveAnchor,
+            min(max(0, columna - 1), len(bloque.text()))
+        )
+
+        self.cajaTexto.setTextCursor(cursor)
+        self.cajaTexto.ensureCursorVisible()
+
+
+    # Limpiar el resaltado de errores
+    def limpiar_error(self):
+        self.cajaTexto.setExtraSelections([])
 
     def nuevo_archivo(self) -> None:
         if not self.confirmar_cambios():
@@ -260,10 +384,17 @@ class Window(QMainWindow, Ui_MainWindow):
         self.salidaConsola.setPlainText(texto)
         self.statusbar.showMessage(estado, 5000)
 
+
     def analizar_codigo(self) -> None:
+        # Limpiar el resaltado de errores anteriores
+        self.limpiar_error()
+
         codigo = self.cajaTexto.toPlainText()
         if not codigo.strip():
-            self.mostrar_resultado("No hay código para analizar.", "Editor vacío.")
+            self.mostrar_resultado(
+                "No hay código para analizar.",
+                "Editor vacío."
+            )
             return
 
         # Fase 1: análisis léxico y sintáctico (PLY)
@@ -272,11 +403,45 @@ class Window(QMainWindow, Ui_MainWindow):
             instrucciones = parser.parse(codigo, lexer=lexer)
 
         except SyntaxError as error:
-            self.mostrar_resultado(f"✖ Error sintáctico: {error}", "Error sintáctico.")
+            self.mostrar_resultado(
+                f"✖ Error sintáctico: {error}",
+                "Error sintáctico."
+            )
+
+            # Localizar y resaltar el error sintáctico
+            ubicacion = re.search(
+                r"l[ií]nea\s+(\d+)(?:\s*,?\s*columna\s+(\d+))?",
+                str(error),
+                re.IGNORECASE
+            )
+
+            if ubicacion:
+                linea = int(ubicacion.group(1))
+                columna = int(ubicacion.group(2) or 1)
+                self.marcar_error(linea, columna)
+
             return
+
         except ValueError as error:
-            self.mostrar_resultado(f"✖ Error léxico: {error}", "Error léxico.")
+            self.mostrar_resultado(
+                f"✖ Error léxico: {error}",
+                "Error léxico."
+            )
+
+            # Localizar y resaltar el error léxico
+            ubicacion = re.search(
+                r"l[ií]nea\s+(\d+)(?:\s*,?\s*columna\s+(\d+))?",
+                str(error),
+                re.IGNORECASE
+            )
+
+            if ubicacion:
+                linea = int(ubicacion.group(1))
+                columna = int(ubicacion.group(2) or 1)
+                self.marcar_error(linea, columna)
+
             return
+
         except Exception as error:
             self.mostrar_resultado(
                 f"✖ Error inesperado al analizar: {error}",
@@ -294,12 +459,27 @@ class Window(QMainWindow, Ui_MainWindow):
         # Fase 2: ejecución del programa ya validado
         try:
             resultados = ejecutar(instrucciones)
+
         except (ErrorEjecucion, ZeroDivisionError, TypeError, ValueError) as error:
             self.mostrar_resultado(
                 f"✔ Sintaxis válida.\n✖ Error de ejecución: {error}",
                 "Error de ejecución."
             )
+
+            # Resaltar el error de ejecución si tiene ubicación
+            ubicacion = re.search(
+                r"l[ií]nea\s+(\d+)(?:\s*,?\s*columna\s+(\d+))?",
+                str(error),
+                re.IGNORECASE
+            )
+
+            if ubicacion:
+                linea = int(ubicacion.group(1))
+                columna = int(ubicacion.group(2) or 1)
+                self.marcar_error(linea, columna)
+
             return
+
         except Exception as error:
             self.mostrar_resultado(
                 f"✖ Error inesperado al ejecutar: {error}",
@@ -308,19 +488,17 @@ class Window(QMainWindow, Ui_MainWindow):
             return
 
         salida = "\n".join(resultados) if resultados else "(el programa no produjo salida)"
+
         self.mostrar_resultado(
             f"✔ Código válido (sin errores léxicos ni sintácticos).\n\n--- Salida ---\n{salida}",
             "Análisis completado sin errores."
         )
-
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if self.confirmar_cambios():
             event.accept()
         else:
             event.ignore()
-
-
 
 def main() -> int:
     app = QApplication(sys.argv)

@@ -41,19 +41,19 @@ tokens = (
 )
 
 reserved = {
-    "int": "INT",
-    "float": "FLOAT",
-    "string": "STRING_TYPE",
-    "print": "PRINT",
-    "if": "IF",
-    "else": "ELSE",
-    "while": "WHILE",
-    "for": "FOR",
-    "true": "TRUE",
-    "false": "FALSE",
-    "and": "AND",
-    "or": "OR",
-    "not": "NOT",
+    "intevil": "INT",
+    "floatnite": "FLOAT",
+    "stringfighter": "STRING_TYPE",
+    "printal": "PRINT",
+    "ifcraft": "IF",
+    "elselda": "ELSE",
+    "whilecraft": "WHILE",
+    "fornite": "FOR",
+    "truetroid": "TRUE",
+    "fallse": "FALSE",
+    "andcraft": "AND",
+    "orizon": "OR",
+    "notality": "NOT",
 }
 
 t_PARIZQ = r"\("
@@ -96,7 +96,7 @@ def t_ENTERO(t):
 
 
 def t_REVALUAR(t):
-    r"realiza\b"
+    r"realizelda\b"
     return t
 
 

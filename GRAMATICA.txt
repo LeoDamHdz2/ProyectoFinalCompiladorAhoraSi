@@ -1,0 +1,331 @@
+GRAMATICA DEL COMPILADOR
+
+PALABRAS RESERVADAS
+
+int     =       intevil         (int + Resident Evil)
+float   =       floatnite       (float + Fortnite)
+string  =       stringfighter   (string + Street Fighter)
+print   =       printal         (print + Portal)
+if      =       ifcraft         (if + Minecraft)
+else    =       elselda         (else + Zelda)
+while   =       whilecraft      (while + Warcraft)
+for     =       fornite         (for + Fortnite)
+true    =       truetroid       (true + Metroid)
+false   =       fallse          (false + Fall Guys)
+and     =       andcraft        (and + Minecraft)
+or      =       orizon          (or + Horizon)
+not     =       notality        (not + Fatality, Mortal Kombat)
+realiza =       realizelda      (realiza + Zelda)
+
+La palabra de la izquierda indica su funcion y la de la derecha es la palabra que debe escribirse en el codigo.
+Las palabras reservadas deben escribirse exactamente en minusculas.
+
+
+TIPOS DE DATOS
+
+intevil
+floatnite
+stringfighter
+
+intevil representa numeros enteros.
+floatnite representa numeros decimales.
+stringfighter representa cadenas de texto.
+
+No existe un tipo bool. Los valores booleanos se representan con las palabras reservadas truetroid y fallse.
+
+
+DECLARACION DE VARIABLES
+
+La declaracion utiliza el siguiente formato:
+
+tipo identificador;
+
+Una declaracion tambien puede incluir un valor inicial:
+
+tipo identificador = expresion;
+
+Si una variable no tiene un valor inicial, se asigna automaticamente el siguiente valor segun su tipo:
+
+intevil: 0
+floatnite: 0.0
+stringfighter: ""
+
+Toda declaracion debe terminar con punto y coma.
+
+
+ASIGNACION DE VARIABLES
+
+Una asignacion utiliza el siguiente formato:
+
+identificador = expresion;
+
+La asignacion debe terminar con punto y coma.
+
+La variable debe haber sido declarada previamente.
+
+Una variable solo puede declararse una vez dentro del mismo ambito.
+
+Una asignacion debe respetar el tipo declarado de la variable:
+
+intevil solo acepta valores enteros.
+floatnite acepta valores enteros o decimales.
+stringfighter solo acepta cadenas de texto.
+
+
+IDENTIFICADORES
+
+Los identificadores deben comenzar con una letra o con el caracter de guion bajo.
+
+Los siguientes caracteres pueden ser letras, numeros o guiones bajos.
+
+Los identificadores son sensibles a mayusculas y minusculas.
+
+Los nombres de las variables no pueden coincidir con palabras reservadas.
+
+
+ESTRUCTURA DE BLOQUES
+
+Un bloque comienza con una llave de apertura y termina con una llave de cierre.
+
+{
+instrucciones
+}
+
+Los bloques permiten agrupar instrucciones.
+
+Las variables declaradas dentro de un bloque existen solamente dentro de ese bloque y sus bloques internos.
+
+
+CONDICION IF
+
+La estructura basica es:
+
+ifcraft (expresion) {
+instrucciones
+}
+
+La estructura con rama alternativa es:
+
+ifcraft (expresion) {
+instrucciones
+} elselda {
+instrucciones
+}
+
+La condicion debe encerrarse entre parentesis.
+
+No existe una estructura equivalente a «else if».
+
+
+CICLO WHILE
+
+La estructura es:
+
+whilecraft (expresion) {
+instrucciones
+}
+
+La condicion debe encerrarse entre parentesis.
+
+El cuerpo se ejecuta mientras la expresion tenga un valor booleano verdadero.
+
+
+CICLO FOR
+
+La estructura es:
+
+fornite (inicializador; condicion; actualizacion) {
+instrucciones
+}
+
+El inicializador se ejecuta una vez antes de comenzar el ciclo.
+
+La condicion determina si el ciclo debe continuar ejecutandose.
+
+La actualizacion se ejecuta despues de cada iteracion.
+
+La condicion puede omitirse.
+
+El inicializador puede ser una declaracion o una asignacion.
+
+La actualizacion puede ser una asignacion.
+
+
+INSTRUCCION PRINT
+
+La estructura es:
+
+printal(argumentos);
+
+printal puede recibir cero o mas expresiones.
+
+Cuando existen varios argumentos, estos deben separarse mediante comas.
+
+Los argumentos se muestran separados por espacios.
+
+La instruccion printal debe terminar con punto y coma.
+
+
+EXPRESIONES ARITMETICAS
+
+Los operadores aritmeticos normales son:
+
++ suma
+- resta
+* multiplicacion
+/ division
+
+Los operadores aritmeticos alternativos son:
+
+suma
+resta
+multi
+divi
+
+El operador menos tambien puede utilizarse como operador unario.
+
+
+EXPRESIONES DE COMPARACION
+
+== igual
+!= diferente
+< menor que
+<= menor o igual que
+> mayor que
+>= mayor o igual que
+
+
+EXPRESIONES LOGICAS
+
+&& representa el operador logico AND.
+|| representa el operador logico OR.
+! representa el operador logico NOT.
+
+Las palabras reservadas correspondientes son:
+
+andcraft
+orizon
+notality
+
+El operador notality puede utilizarse antes de una expresion.
+
+
+PRECEDENCIA DE OPERADORES
+
+El orden de precedencia, de mayor a menor, es:
+
+notality y menos unario
+multiplicacion y division
+suma y resta
+comparaciones menor, menor igual, mayor y mayor igual
+igualdad y desigualdad
+andcraft
+orizon
+
+Los parentesis permiten modificar la precedencia.
+
+
+LITERALES ENTEROS
+
+Un literal entero se compone de uno o mas digitos.
+
+Los numeros enteros negativos se representan colocando el operador menos antes del numero o expresion.
+
+
+LITERALES DECIMALES
+
+Un literal decimal contiene una parte entera, un punto decimal y una parte decimal.
+
+Los numeros decimales negativos se representan colocando el operador menos antes del numero o expresion.
+
+
+LITERALES DE TEXTO
+
+Las cadenas de texto pueden delimitarse con comillas dobles o con comillas simples.
+
+Las cadenas admiten secuencias de escape reconocidas por Python.
+
+
+VALORES BOOLEANOS
+
+truetroid representa el valor verdadero.
+
+fallse representa el valor falso.
+
+
+AGRUPACION
+
+Los parentesis pueden agrupar expresiones.
+
+Su estructura es:
+
+(expresion)
+
+
+SINTAXIS ESPECIAL REALIZELDA
+
+La estructura es:
+
+realizelda { expresion } ;
+
+Esta instruccion evalua una expresion y agrega el resultado a la salida numerada.
+
+realizelda acepta expresiones aritmeticas, expresiones con variables y expresiones agrupadas.
+
+
+SIMBOLOS DE ESTRUCTURA
+
+{ apertura de bloque
+} cierre de bloque
+( apertura de parentesis
+) cierre de parentesis
+; punto y coma
+, coma
+= asignacion
+" delimitador de cadena de texto
+' delimitador alternativo de cadena de texto
+
+Cada declaracion, asignacion, instruccion printal e instruccion realizelda debe finalizar con punto y coma.
+
+
+NOMBRES PERMITIDOS PARA IDENTIFICADORES
+
+Los identificadores pueden contener letras.
+
+Los identificadores pueden contener digitos despues del primer caracter.
+
+Los identificadores pueden contener el caracter de guion bajo.
+
+El primer caracter puede ser una letra o un guion bajo.
+
+
+ELEMENTOS NO SOPORTADOS POR LA GRAMATICA
+
+Comentarios con almohadilla.
+Comentarios con barras dobles.
+Comentarios de bloque.
+Funciones declaradas por el usuario.
+Tipos arrays o listas.
+Valores booleanos declarados mediante un tipo bool.
+Operador de incremento.
+Operador de decremento.
+Asignacion compuesta.
+Operador ternario.
+Estructura else if.
+La palabra reservada break.
+La palabra reservada continue.
+Conversiones mediante funciones int, float o str dentro del lenguaje.
+Funciones de entrada.
+
+
+LIMITES DE EJECUCION
+
+Las iteraciones totales de los ciclos while y for tienen un limite de 100000.
+
+Una variable no puede volver a declararse dentro del mismo ambito.
+
+Una variable debe declararse antes de ser utilizada.
+
+Una division puede producir un error si el divisor es cero.
+
+Las operaciones y asignaciones deben respetar los tipos declarados.

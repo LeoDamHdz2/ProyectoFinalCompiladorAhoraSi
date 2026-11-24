@@ -25,6 +25,10 @@ class Resaltador(QSyntaxHighlighter):
 
         # Palabras reservadas de Python
         reservadas = keyword.kwlist + [
+            "intevil", "floatnite", "stringfighter", "printal",
+            "ifcraft", "elselda", "whilecraft", "fornite",
+            "truetroid", "fallse", "andcraft", "orizon", "notality",
+            "realizelda",
             "entero", "decimal", "texto",
             "cadena", "booleano",
             "mostrar", "imprimir",
@@ -41,7 +45,7 @@ class Resaltador(QSyntaxHighlighter):
 
         # Funciones conocidas
         funciones = [
-            "print", "input", "len",
+            "printal", "input", "len",
             "range", "int", "float", "str"
         ]
 

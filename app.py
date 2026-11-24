@@ -17,8 +17,8 @@ from principal import Ui_MainWindow
 from gramatica import ErrorEjecucion, ejecutar, lexer, parser
 from colores import Resaltador
 
-EXTENSION_POR_DEFECTO = ".ism"
-FILTRO_ARCHIVOS = "Archivos ISM (*.ism);;Archivos de texto (*.txt);;Todos los archivos (*)"
+EXTENSION_POR_DEFECTO = ".gmescr"
+FILTRO_ARCHIVOS = "Archivos GMESCR (*.gmescr);;Archivos de texto (*.txt);;Todos los archivos (*)"
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -313,7 +313,7 @@ class Window(QMainWindow, Ui_MainWindow):
             nombre, _ = QFileDialog.getSaveFileName(
                 self,
                 "Guardar archivo",
-                str(Path.home() / "sin-titulo.ism"),
+                str(Path.home() / "sin-titulo.gmescr"),
                 FILTRO_ARCHIVOS,
             )
             if not nombre:

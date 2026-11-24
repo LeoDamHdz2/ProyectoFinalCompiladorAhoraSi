@@ -1,0 +1,8 @@
+intevil edad = 20;
+floatnite precio = 19.5;
+stringfighter nombre = "Alex";
+
+printal("Hola,", nombre);
+printal("Edad:", edad);
+printal("Precio doble:", precio * 2);
+realizelda { edad + 1 };

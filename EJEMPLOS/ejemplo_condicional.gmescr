@@ -1,0 +1,7 @@
+intevil puntaje = 85;
+
+ifcraft (puntaje >= 70 && truetroid) {
+    printal("Aprobado");
+} elselda {
+    printal("Reprobado");
+}

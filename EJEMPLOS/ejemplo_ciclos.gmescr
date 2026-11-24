@@ -1,0 +1,13 @@
+intevil contador = 1;
+intevil total = 0;
+
+whilecraft (contador <= 5) {
+    total = total + contador;
+    contador = contador + 1;
+}
+
+printal("Suma del 1 al 5:", total);
+
+fornite (intevil vuelta = 1; vuelta <= 3; vuelta = vuelta + 1) {
+    printal("Vuelta:", vuelta);
+}
